@@ -1,4 +1,5 @@
-import java.awt.*;
+package com.sxy.tank;
+
 import java.util.concurrent.TimeUnit;
 
 public class Main {
@@ -7,11 +8,10 @@ public class Main {
         tf.setVisible(true);
         for(;;){
             try {
-                TimeUnit.MICROSECONDS.sleep(1000);
+                TimeUnit.MICROSECONDS.sleep(2500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
             tf.repaint();
         }
     }
