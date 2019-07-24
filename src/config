@@ -1,0 +1,14 @@
+#坦克的数量
+initTankCount=5
+#炮弹的速度
+initBulletSpeed=10
+#坦克的数量
+initTankSpeed=5
+#游戏的宽度
+#initGameWidth=800
+#游戏的高度
+#initGameHeight=600
+#炮弹发射模式
+#tankFireStrategy=FourDirFireStrategy
+tankFireStrategy=DefaultFireStrategy
+#tankFireStrategy=LeftRightFireStrategy
