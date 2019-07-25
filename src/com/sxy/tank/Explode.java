@@ -24,9 +24,6 @@ public class Explode  extends  AbstractGameObject{
         this.y = y;
     }
 
-    public boolean isLive() {
-        return live;
-    }
 
     public void setLive(boolean over) {
         this.live = over;
@@ -49,6 +46,11 @@ public class Explode  extends  AbstractGameObject{
         if(step >=ResourceMgr.explodes.length){
             this.die();
         }
+    }
+
+    @Override
+    public boolean isLive() {
+        return false;
     }
 
     private void die() {

@@ -1,21 +1,25 @@
 package com.sxy.tank;
 
+
 import java.awt.*;
 
 /**
  * 炮弹类
  */
-public class Bullet  extends  AbstractGameObject{
+public class Bullet extends  AbstractGameObject{
     private int x, y;
     private Dir dir;
     private Group group;
     public static final int SPEED = Integer.parseInt(PropertyMgr.get("initBulletSpeed"));
-    private Boolean live =true;
-    public Boolean getLive() {
+    private boolean live =true;
+    private int w=ResourceMgr.bulletU.getWidth();
+    private int h=ResourceMgr.bulletU.getHeight();
+    private Rectangle rect;
+    @Override
+    public boolean isLive() {
         return live;
     }
-
-    public void setLive(Boolean live) {
+    public void setLive(boolean live) {
         this.live = live;
     }
 
@@ -60,6 +64,7 @@ public class Bullet  extends  AbstractGameObject{
         this.y = y;
         this.dir = dir;
         this.group = group;
+        rect=new Rectangle(this.x, this.y, w, h);
     }
 
     public void paint(Graphics g) {
@@ -78,6 +83,9 @@ public class Bullet  extends  AbstractGameObject{
                 break;
         }
         move();
+        //更新当前坐标到Rectangle
+        rect.x=this.x;
+        rect.y=this.y;
     }
 
     private void move() {
@@ -95,21 +103,21 @@ public class Bullet  extends  AbstractGameObject{
                 y += SPEED;
                 break;
         }
+        isBulletCrossing();
+
     }
 
-    public void collidesWithTank(Tank tank) {
-        //子弹 坦克是否死掉
-        if(!this.getLive() || !tank.getLive())return;
-
-        if(this.group==tank.getGroup()) return;
-
-        Rectangle rect = new Rectangle(x, y, ResourceMgr.bulletU.getWidth(), ResourceMgr.bulletU.getHeight());
-        Rectangle rectTank = new Rectangle(tank.getX(), tank.getY(), ResourceMgr.goodTankU.getWidth(), ResourceMgr.goodTankU.getHeight());
-        if(rect.intersects(rectTank)){
+    private void isBulletCrossing() {
+        if(this.getX()>TankFrame.GAME_WIDTH||this.getX()<0||this.getY()>TankFrame.GAME_HEIGHT||this.getY()<0){
             this.die();
-            tank.die();
         }
     }
+
+    public Rectangle getRect(){
+        return rect;
+    }
+
+
     public void die(){
         this.setLive(false);
     }

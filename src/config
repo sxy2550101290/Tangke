@@ -12,3 +12,4 @@ initTankSpeed=5
 #tankFireStrategy=FourDirFireStrategy
 tankFireStrategy=DefaultFireStrategy
 #tankFireStrategy=LeftRightFireStrategy
+colliders=BulletTankCollider,BulletWallCollider,TankWallCollider

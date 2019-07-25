@@ -9,6 +9,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
 
+/**
+ * 我方坦克
+ */
 public class Player  extends  AbstractGameObject{
     //x y 代表坦克的起始坐标
     private int x,y;
@@ -18,7 +21,7 @@ public class Player  extends  AbstractGameObject{
     //坦克是否运动
     private boolean moving=false;
     private Group group;
-    private Boolean live=true;
+    private boolean live=true;
 
     private int width,height;
 
@@ -29,12 +32,12 @@ public class Player  extends  AbstractGameObject{
     public void setGroup(Group group) {
         this.group = group;
     }
-
-    public Boolean getLive() {
+    @Override
+    public boolean isLive() {
         return live;
     }
 
-    public void setLive(Boolean live) {
+    public void setLive(boolean live) {
         this.live = live;
     }
 
@@ -77,7 +80,7 @@ public class Player  extends  AbstractGameObject{
 
     public void paint(Graphics g) {
         //坦克是否死掉
-        if(!this.getLive())return;
+        if(!this.isLive())return;
 
         switch (dir) {
             case L:

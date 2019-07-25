@@ -18,6 +18,9 @@ public class Tank  extends AbstractGameObject{
     //活着
     private Boolean live=true;
 
+    private int oldx,oldy;
+
+    private Rectangle rect;
     private int width,height;
 
     private Random random=new Random();
@@ -29,7 +32,7 @@ public class Tank  extends AbstractGameObject{
         this.group = group;
     }
 
-    public Boolean getLive() {
+    public boolean isLive() {
         return live;
     }
 
@@ -51,6 +54,10 @@ public class Tank  extends AbstractGameObject{
         this.group=group;
         this.width=ResourceMgr.badTankU.getWidth();
         this.height=ResourceMgr.badTankU.getHeight();
+        //记录之前坐标
+        oldx=x;
+        oldy=y;
+        rect=new Rectangle(this.x, this.y,this.width,this.height);
     }
     public int getX() {
         return x;
@@ -74,7 +81,7 @@ public class Tank  extends AbstractGameObject{
 
     public void paint(Graphics g) {
         //坦克是否死掉
-        if(!this.getLive())return;
+        if(!this.isLive())return;
 
         switch (dir) {
             case L:
@@ -90,11 +97,24 @@ public class Tank  extends AbstractGameObject{
                 g.drawImage(ResourceMgr.badTankD, x, y, null);
                 break;
         }
-
+        //移动
         move();
-        if(random.nextInt(100)<97) return;
-        fire();
+        rect.x=this.x;
+        rect.y=this.y;
     }
+
+    private void boundsCheck() {
+        if(x<0||y<30||x>(TankFrame.GAME_WIDTH-this.width)||y>(TankFrame.GAME_HEIGHT-this.height)){
+            this.back();
+        }
+
+    }
+
+    public void back() {
+        this.x=this.oldx;
+        this.y=this.oldy;
+    }
+
     /**
      * 子弹发射位置
      */
@@ -108,31 +128,29 @@ public class Tank  extends AbstractGameObject{
     private void move() {
         if(!moving){return;}
 
+        oldx=x;
+        oldy=y;
         switch (dir){
             case L:
-                //越界不往前走
-                if(x<this.width) break;
                 x -= SPEED;
                 break;
             case U:
-                //越界不往前走
-                if(y<this.height) break;
                 y -= SPEED;
                 break;
             case R:
-                //越界不往前走
-                if(x>(TankFrame.GAME_WIDTH-this.width)) break;
                 x += SPEED;
                 break;
             case D:
-                //越界不往前走
-                if(y>(TankFrame.GAME_HEIGHT-this.height)) break;
                 y += SPEED;
                 break;
         }
+
         //随机方向
         randomDir();
-
+        //是否越界
+        boundsCheck();
+        if(random.nextInt(100)<97) return;
+        fire();
     }
 
     private void randomDir() {
@@ -143,5 +161,10 @@ public class Tank  extends AbstractGameObject{
     public void die(){
         this.setLive(false);
         TankFrame.INSTANCE.add(new Explode(this.x, this.y));
+    }
+
+
+    public Rectangle getRect() {
+        return rect;
     }
 }

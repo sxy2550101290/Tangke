@@ -1,4 +1,7 @@
 package com.sxy.tank;
+import com.sxy.tank.chainofresponsibility.Collider;
+import com.sxy.tank.chainofresponsibility.ColliderChain;
+
 import java.util.List;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -11,7 +14,10 @@ import java.util.ArrayList;
 public class TankFrame extends Frame {
     public static final TankFrame INSTANCE=new TankFrame();
     private Player mytank;
+    private Wall wall;
     private List<AbstractGameObject> objects;
+    private ColliderChain colliderChain=new ColliderChain();
+
     //游戏页面的长宽
     public static final int GAME_WIDTH=800,GAME_HEIGHT=600;
 
@@ -23,18 +29,20 @@ public class TankFrame extends Frame {
         this.addKeyListener(new TankKeyListener());
 
         initGameObject();
-
     }
+
+
 
     private void initGameObject() {
         objects=new ArrayList<>();
+        wall=new Wall(300, 150, 200, 60);
         //我方坦克起始坐标
         mytank=new Player(100,100,Dir.D, Group.GOOD);
         int tankCount=Integer.parseInt(PropertyMgr.get("initTankCount"));
         for(int i=0;i<tankCount;i++){
             objects.add(new Tank(50+i*50,200,Dir.R,Group.BAD));
         }
-
+        objects.add(wall);
     }
 
     public void add(AbstractGameObject go){
@@ -49,44 +57,26 @@ public class TankFrame extends Frame {
     public void paint(Graphics g) {
         Color c = g.getColor();
         g.setColor(Color.white);
+        g.drawString("objects"+objects.size(), 10, 50);
         g.setColor(c);
+        wall.paint(g);
         //第一个坦克
         mytank.paint(g);
-
         for (int i = 0; i < objects.size(); i++) {
-            objects.get(i).paint(g);
-        }
-        /*//敌方坦克
-        for (int i = 0; i < tanks.size(); i++) {
-            if(!tanks.get(i).getLive()) {
-                tanks.remove(tanks.get(i));
+            AbstractGameObject go1 = objects.get(i);
+            if(!go1.isLive()){
+                objects.remove(go1);
+                break;
+            }
+            for (int j = 0; j < objects.size(); j++) {
+                AbstractGameObject go2 = objects.get(j);
+                colliderChain.collide(go1,go2);
+            }
+            if(go1.isLive()){
+                go1.paint(g);
+            }
 
-            }else{
-                tanks.get(i).paint(g);
-            }
         }
-        //画出子弹
-        for (int i = 0; i < bullets.size(); i++) {
-            Bullet bullet = bullets.get(i);
-            for (int j = 0; j < tanks.size(); j++) {
-                bullet.collidesWithTank(tanks.get(j));
-            }
-            if(bullet.getX()>GAME_WIDTH||bullet.getX()<0||bullet.getY()>GAME_HEIGHT||bullet.getY()<0){
-                bullet.die();
-            }
-            if(!bullet.getLive()){
-                bullets.remove(bullet);
-            }
-            bullet.paint(g);
-        }
-        //画出爆炸
-        for (int i = 0; i < explodes.size(); i++) {
-            if(!explodes.get(i).isLive()){
-                explodes.remove(i);
-            }else{
-                explodes.get(i).paint(g);
-            }
-        }*/
     }
 
     private class TankKeyListener extends KeyAdapter {
