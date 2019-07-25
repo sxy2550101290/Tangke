@@ -50,7 +50,7 @@ public class Explode  extends  AbstractGameObject{
 
     @Override
     public boolean isLive() {
-        return false;
+        return live;
     }
 
     private void die() {

@@ -2,7 +2,9 @@ package com.sxy.tank.chainofresponsibility;
 
 import com.sxy.tank.AbstractGameObject;
 
-public interface Collider {
+import java.io.Serializable;
+
+public interface Collider extends Serializable {
     /**
      * 碰撞类 false chain 继续运行，true 终止运行
      * @param obj1

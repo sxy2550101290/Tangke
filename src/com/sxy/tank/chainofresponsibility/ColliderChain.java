@@ -3,13 +3,14 @@ package com.sxy.tank.chainofresponsibility;
 import com.sxy.tank.AbstractGameObject;
 import com.sxy.tank.PropertyMgr;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * 碰撞责任链
  */
-public class ColliderChain {
+public class ColliderChain implements Collider{
 
     private List<Collider> colliders;
 
@@ -29,11 +30,12 @@ public class ColliderChain {
             }
         }
     }
-    public void collide(AbstractGameObject go1,AbstractGameObject go2){
+    public boolean collide(AbstractGameObject go1,AbstractGameObject go2){
         for (Collider collider : colliders) {
             if(!collider.collide(go1, go2)){
                 break;
             }
         }
+        return true;
     }
 }
