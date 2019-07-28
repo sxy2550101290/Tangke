@@ -1,7 +1,10 @@
 package com.sxy.tank;
 
+import com.sxy.tank.net.TankJoinMsg;
+
 import java.awt.*;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * 敌方坦克
@@ -18,12 +21,40 @@ public class Tank  extends AbstractGameObject{
     //活着
     private Boolean live=true;
 
-    private int oldx,oldy;
+    private UUID id;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     private Rectangle rect;
+
+    private int oldx,oldy;
+
     private int width,height;
 
     private Random random=new Random();
+
+    public Tank(TankJoinMsg msg) {
+        this.x=msg.getX();
+        this.y=msg.getY();
+        this.dir=msg.getDir();
+        this.moving=msg.isMoving();
+        this.group=msg.getGroup();
+        this.id=msg.getId();
+
+        this.width=ResourceMgr.badTankU.getWidth();
+        this.height=ResourceMgr.badTankU.getHeight();
+        //记录之前坐标
+        oldx=x;
+        oldy=y;
+        rect=new Rectangle(this.x, this.y,this.width,this.height);
+    }
+
     public Group getGroup() {
         return group;
     }
@@ -85,16 +116,16 @@ public class Tank  extends AbstractGameObject{
 
         switch (dir) {
             case L:
-                g.drawImage(ResourceMgr.badTankL, x, y, null);
+                g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankL:ResourceMgr.goodTankL, x, y, null);
                 break;
             case U:
-                g.drawImage(ResourceMgr.badTankU, x, y, null);
+                g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankU:ResourceMgr.badTankU, x, y, null);
                 break;
             case R:
-                g.drawImage(ResourceMgr.badTankR, x, y, null);
+                g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankR:ResourceMgr.goodTankR, x, y, null);
                 break;
             case D:
-                g.drawImage(ResourceMgr.badTankD, x, y, null);
+                g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankD:ResourceMgr.goodTankD, x, y, null);
                 break;
         }
         //移动

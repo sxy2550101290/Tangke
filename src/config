@@ -1,8 +1,8 @@
 #坦克的数量
-initTankCount=5
+initTankCount=0
 #炮弹的速度
 initBulletSpeed=10
-#坦克的数量
+#坦克的速度
 initTankSpeed=5
 #游戏的宽度
 #initGameWidth=800

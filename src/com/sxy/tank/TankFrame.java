@@ -55,6 +55,7 @@ public class TankFrame extends Frame implements Serializable{
             oos=new ObjectOutputStream(fos);
             oos.writeObject(this.gm);
             oos.flush();
+            System.out.println("存储成功");
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -81,6 +82,7 @@ public class TankFrame extends Frame implements Serializable{
             fis=new FileInputStream(f);
             ois=new ObjectInputStream(fis);
             this.gm= (GameModel)(ois.readObject());
+            System.out.println("读取成功");
         }catch (Exception e){
             e.printStackTrace();
         }finally {

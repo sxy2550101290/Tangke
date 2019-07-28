@@ -8,6 +8,7 @@ import com.sxy.tank.strategy.LeftRightFireStrategy;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * 我方坦克
@@ -23,8 +24,15 @@ public class Player  extends  AbstractGameObject{
     private Group group;
     private boolean live=true;
 
-    private int width,height;
+    public UUID getId() {
+        return id;
+    }
+    public boolean isMoving() {
+        return moving;
+    }
 
+    private int width,height;
+    private UUID id=UUID.randomUUID();
     public Group getGroup() {
         return group;
     }
@@ -81,6 +89,11 @@ public class Player  extends  AbstractGameObject{
     public void paint(Graphics g) {
         //坦克是否死掉
         if(!this.isLive())return;
+
+        Color c=g.getColor();
+        g.setColor(Color.yellow);
+        g.drawString(id.toString(), x, y-10);
+        g.setColor(c);
 
         switch (dir) {
             case L:
