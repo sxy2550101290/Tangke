@@ -1,7 +1,11 @@
 package com.sxy.tank;
 
 
+import com.sxy.tank.net.BulletNewMsg;
+import com.sxy.tank.net.Client;
+
 import java.awt.*;
+import java.util.UUID;
 
 /**
  * 炮弹类
@@ -15,6 +19,8 @@ public class Bullet extends  AbstractGameObject{
     private int w=ResourceMgr.bulletU.getWidth();
     private int h=ResourceMgr.bulletU.getHeight();
     private Rectangle rect;
+    private UUID id;
+    private UUID playerId;
     @Override
     public boolean isLive() {
         return live;
@@ -59,12 +65,14 @@ public class Bullet extends  AbstractGameObject{
         return SPEED;
     }
 
-    public Bullet(int x, int y, Dir dir, Group group) {
+    public Bullet(int x, int y, Dir dir, Group group,UUID playerId) {
         this.x = x;
         this.y = y;
         this.dir = dir;
         this.group = group;
         rect=new Rectangle(this.x, this.y, w, h);
+        this.id=UUID.randomUUID();
+        this.playerId=playerId;
     }
 
     public void paint(Graphics g) {
@@ -123,4 +131,19 @@ public class Bullet extends  AbstractGameObject{
     }
 
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(UUID playerId) {
+        this.playerId = playerId;
+    }
 }

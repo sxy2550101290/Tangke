@@ -1,13 +1,13 @@
 package com.sxy.tank;
 
-import com.sxy.tank.strategy.DefaultFireStrategy;
+import com.sxy.tank.net.BulletNewMsg;
+import com.sxy.tank.net.Client;
+import com.sxy.tank.net.TankMovingOrDirChangeMsg;
+import com.sxy.tank.net.TankStopMovingMsg;
 import com.sxy.tank.strategy.FireStrategy;
-import com.sxy.tank.strategy.FourDirFireStrategy;
-import com.sxy.tank.strategy.LeftRightFireStrategy;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -155,7 +155,6 @@ public class Player  extends  AbstractGameObject{
      */
     private void fire() {
         fireStrategy.fire(this);
-
     }
 
     public void KeyPressed(KeyEvent e){
@@ -191,9 +190,13 @@ public class Player  extends  AbstractGameObject{
     }
 
     private void setMainDir() {
+        Dir oldDir=this.getDir();
+        boolean oldMoving=moving;
         //没有按键 坦克不动
         if(!bl&&!bu&&!br&&!bd){
             moving=false;
+            //发送停止消息
+            Client.INSTANCE.send(new TankStopMovingMsg(this.id, this.x, this.y));
         }else {
             moving = true;
             if(bl&&!bu&&!br&&!bd){
@@ -208,6 +211,10 @@ public class Player  extends  AbstractGameObject{
             if(!bl&&!bu&&!br&&bd){
                 dir=Dir.D;
             }
+            //发送移动消息
+            if(!oldMoving)Client.INSTANCE.send(new TankMovingOrDirChangeMsg(this.id,this.x,this.y,this.dir));
+
+            if(!this.dir.equals(oldDir))Client.INSTANCE.send(new TankMovingOrDirChangeMsg(this.id,this.x,this.y,this.dir));
         }
     }
 
@@ -231,6 +238,7 @@ public class Player  extends  AbstractGameObject{
                 y += SPEED;
                 break;
         }
+
     }
 
     public void die(){

@@ -68,7 +68,7 @@ public class GameModel implements Serializable {
         return mytank;
     }
 
-    public Tank fandTankByUUID(UUID id) {
+    public Tank findTankByUUID(UUID id) {
         for(AbstractGameObject o:objects){
             if(o instanceof Tank){
                 Tank t=(Tank)o;
@@ -79,4 +79,5 @@ public class GameModel implements Serializable {
         }
         return null;
     }
+
 }

@@ -1,88 +1,53 @@
 package com.sxy.tank.net;
 
-import com.sxy.tank.*;
+import com.sxy.tank.Bullet;
+import com.sxy.tank.Dir;
+import com.sxy.tank.Group;
+import com.sxy.tank.TankFrame;
 
 import java.io.*;
 import java.util.UUID;
 
-public class TankJoinMsg  extends Msg{
+public class BulletNewMsg extends Msg {
     private int x,y;
+    private UUID id;
     private Dir dir;
-    private boolean moving;
+    private UUID playerId;
     private Group group;
-    private UUID id;//
-    public int getX() {
-        return x;
-    }
 
-    public void setX(int x) {
+    public BulletNewMsg() {
+    }
+    public BulletNewMsg(int x, int y, UUID id, Dir dir, UUID playerId, Group group) {
         this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
         this.y = y;
-    }
-
-    public Dir getDir() {
-        return dir;
-    }
-
-    public void setDir(Dir dir) {
-        this.dir = dir;
-    }
-
-    public boolean isMoving() {
-        return moving;
-    }
-
-    public void setMoving(boolean moving) {
-        this.moving = moving;
-    }
-
-    public Group getGroup() {
-        return group;
-    }
-
-    public void setGroup(Group group) {
-        this.group = group;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
         this.id = id;
-    }
-
-    public TankJoinMsg(){
-    }
-
-    public TankJoinMsg(Player p){
-        this.x=p.getX();
-        this.y=p.getY();
-        this.dir=p.getDir();
-        this.moving=p.isMoving();
-        this.group=p.getGroup();
-        this.id=p.getId();
+        this.dir = dir;
+        this.playerId = playerId;
+        this.group = group;
     }
 
     @Override
     public String toString() {
-        return "TankJoinMsg{" +
+        return "BulletNewMsg{" +
                 "x=" + x +
                 ", y=" + y +
-                ", dir=" + dir +
-                ", moving=" + moving +
-                ", group=" + group +
                 ", id=" + id +
+                ", dir=" + dir +
+                ", playerId=" + playerId +
+                ", group=" + group +
                 '}';
     }
 
+    public BulletNewMsg(Bullet bullet){
+        this.playerId=bullet.getPlayerId();
+        this.id=bullet.getId();
+        this.x=bullet.getX();
+        this.y=bullet.getY();
+        this.dir=bullet.getDir();
+        this.group=bullet.getGroup();
+    }
+
+    @Override
     public byte[] toBytes() {
         ByteArrayOutputStream baos=null;
         DataOutputStream dos=null;
@@ -91,13 +56,18 @@ public class TankJoinMsg  extends Msg{
         try {
             baos=new ByteArrayOutputStream();
             dos=new DataOutputStream(baos);
-            dos.writeInt(x);
-            dos.writeInt(y);
-            dos.writeInt(dir.ordinal());
-            dos.writeBoolean(moving);
-            dos.writeInt(group.ordinal());
+
+            dos.writeLong(playerId.getMostSignificantBits());
+            dos.writeLong(playerId.getLeastSignificantBits());
+
             dos.writeLong(id.getMostSignificantBits());
             dos.writeLong(id.getLeastSignificantBits());
+            dos.writeInt(x);
+            dos.writeInt(y);
+
+            dos.writeInt(dir.ordinal());
+            dos.writeInt(group.ordinal());
+
             dos.flush();
             bytes=baos.toByteArray();
         } catch (Exception e) {
@@ -120,16 +90,21 @@ public class TankJoinMsg  extends Msg{
         return bytes;
     }
 
+    @Override
     public void parse(byte[] bytes) {
         DataInputStream dis=new DataInputStream(new ByteArrayInputStream(bytes));
 
         try {
+            this.playerId=new UUID(dis.readLong(), dis.readLong());
+
+            this.id=new UUID(dis.readLong(), dis.readLong());
+
             this.x=dis.readInt();
             this.y=dis.readInt();
+
             this.dir=Dir.values()[dis.readInt()];
-            this.moving=dis.readBoolean();
             this.group=Group.values()[dis.readInt()];
-            this.id=new UUID(dis.readLong(), dis.readLong());
+
         }catch(Exception e){
             e.printStackTrace();
         }finally {
@@ -141,18 +116,17 @@ public class TankJoinMsg  extends Msg{
         }
     }
 
+    @Override
     public void handle() {
-        if(this.id.equals(TankFrame.INSTANCE.getGm().getMytank().getId())) return;
-        if(TankFrame.INSTANCE.getGm().findTankByUUID(this.id)!=null) return;
+        if(this.playerId.equals(TankFrame.INSTANCE.getGm().getMytank().getId())) return;
 
-        Tank t=new Tank(this);
-        TankFrame.INSTANCE.getGm().add(t);
-        Client.INSTANCE.send(new TankJoinMsg(TankFrame.INSTANCE.getGm().getMytank()));
-
+        Bullet bullet=new Bullet(this.x, this.y, this.dir, this.group, this.playerId);
+        bullet.setId(this.id);
+        TankFrame.INSTANCE.getGm().add(bullet);
     }
 
     @Override
     public MsgType getMsgType() {
-        return MsgType.TankJoin;
+        return MsgType.BulletNew;
     }
 }

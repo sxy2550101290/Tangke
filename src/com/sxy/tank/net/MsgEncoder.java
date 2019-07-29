@@ -4,12 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-public class MsgEncoder extends MessageToByteEncoder<TankJoinMsg> {
+public class MsgEncoder extends MessageToByteEncoder<Msg> {
     @Override
-    protected void encode(ChannelHandlerContext channelHandlerContext, TankJoinMsg msg, ByteBuf byteBuf) throws Exception {
+    protected void encode(ChannelHandlerContext channelHandlerContext, Msg msg, ByteBuf buf) throws Exception {
+        buf.writeInt(msg.getMsgType().ordinal());
         byte[] bytes=msg.toBytes();
-        byteBuf.writeInt(bytes.length);
-        byteBuf.writeBytes(bytes);
+        buf.writeInt(bytes.length);
+        buf.writeBytes(bytes);
 
     }
 }

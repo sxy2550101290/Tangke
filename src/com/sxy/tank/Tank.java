@@ -55,6 +55,14 @@ public class Tank  extends AbstractGameObject{
         rect=new Rectangle(this.x, this.y,this.width,this.height);
     }
 
+    public boolean isMoving() {
+        return moving;
+    }
+
+    public void setMoving(boolean moving) {
+        this.moving = moving;
+    }
+
     public Group getGroup() {
         return group;
     }
@@ -152,7 +160,7 @@ public class Tank  extends AbstractGameObject{
     private void fire() {
         int bx=x+ResourceMgr.goodTankU.getWidth()/2-ResourceMgr.bulletU.getWidth()/2;
         int by=y+ResourceMgr.goodTankU.getHeight()/2-ResourceMgr.bulletU.getHeight()/2;
-        TankFrame.INSTANCE.getGm().add(new Bullet(bx, by, dir, group));
+        TankFrame.INSTANCE.getGm().add(new Bullet(bx, by, dir, group,id));
     }
 
 
@@ -175,13 +183,13 @@ public class Tank  extends AbstractGameObject{
                 y += SPEED;
                 break;
         }
-
-        //随机方向
-        randomDir();
         //是否越界
         boundsCheck();
+        /*//随机方向
+        randomDir();
+
         if(random.nextInt(100)<97) return;
-        fire();
+        fire();*/
     }
 
     private void randomDir() {

@@ -1,7 +1,6 @@
-package com.sxy.tank.net;
+package nettycodec;
 
-import com.sxy.tank.GameModel;
-import com.sxy.tank.TankFrame;
+import com.sxy.tank.Tank;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,17 +10,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.ReferenceCountUtil;
 import nettyChat.ClientFrame;
-import nettycodec.TankMsg;
-import nettycodec.TankMsgEncoder;
 
 public class Client {
 
-    public static final Client INSTANCE=new Client();
-
     private Channel channel=null;
-
-    private Client(){
-    }
 
     public void connerc() {
         EventLoopGroup workerGroup=new NioEventLoopGroup(1);
@@ -35,8 +27,7 @@ public class Client {
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
                     channel=socketChannel;
                     socketChannel.pipeline()
-                            .addLast(new MsgEncoder())
-                            .addLast(new MsgDecoder())
+                            .addLast(new TankMsgEncoder())
                             .addLast(new MyHandler());
                 }
             });
@@ -52,15 +43,34 @@ public class Client {
         }
     }
 
-    public void send(Msg msg) {
-        channel.writeAndFlush(msg);
+    public void send(String s) {
+        channel.writeAndFlush(Unpooled.copiedBuffer(s.getBytes()));
     }
 
     public void closeConnection() {
+        send("__bye__");
         channel.close();
     }
 
-    static class MyHandler extends SimpleChannelInboundHandler<Msg> {
+    static class MyHandler extends ChannelInboundHandlerAdapter {
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+            ByteBuf buf=null;
+
+            try {
+                buf=(ByteBuf)msg;
+                byte[] bytes=new byte[buf.readableBytes()];
+                buf.getBytes(buf.readerIndex(), bytes);
+                String str=new String(bytes);
+                System.out.println(str);
+                ClientFrame.INSTANCE.updateText(str);
+            } finally {
+                //System.out.println(buf.refCnt());
+                if(null != buf)
+                    ReferenceCountUtil.release(buf);
+                //System.out.println(msg.toString());
+            }
+        }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -70,14 +80,8 @@ public class Client {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            ctx.writeAndFlush(new TankJoinMsg(TankFrame.INSTANCE.getGm().getMytank()));
+            ctx.writeAndFlush(new TankMsg(5, 8));
 
-        }
-
-        @Override
-        protected void channelRead0(ChannelHandlerContext channelHandlerContext, Msg msg) throws Exception {
-            System.out.println(msg.toString());
-            msg.handle();
         }
     }
     public static void main(String[] args) {
