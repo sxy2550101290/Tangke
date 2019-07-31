@@ -33,6 +33,8 @@ public class Player  extends  AbstractGameObject{
 
     private int width,height;
     private UUID id=UUID.randomUUID();
+    private int oldx,oldy;
+    private Rectangle rect;
     public Group getGroup() {
         return group;
     }
@@ -63,6 +65,11 @@ public class Player  extends  AbstractGameObject{
         this.group=group;
         this.height=ResourceMgr.goodTankU.getHeight();
         this.width=ResourceMgr.goodTankU.getWidth();
+
+        oldx=x;
+        oldy=y;
+
+        rect=new Rectangle(this.x, this.y, this.width, this.height);
         //初始化炮弹策略
         this.initFireStrategy();
     }
@@ -111,6 +118,8 @@ public class Player  extends  AbstractGameObject{
         }
 
         move();
+        rect.x=this.x;
+        rect.y=this.y;
     }
 
     /**
@@ -154,7 +163,8 @@ public class Player  extends  AbstractGameObject{
      * 子弹发射位置
      */
     private void fire() {
-        fireStrategy.fire(this);
+        if(this.isLive())
+            fireStrategy.fire(this);
     }
 
     public void KeyPressed(KeyEvent e){
@@ -220,28 +230,43 @@ public class Player  extends  AbstractGameObject{
 
     private void move() {
         if(!moving){return;}
+
+        oldx=x;
+        oldy=y;
+
         switch (dir){
             case L:
-                if(x<0) break;
                 x -= SPEED;
                 break;
             case U:
-                if(y<30) break;
                 y -= SPEED;
                 break;
             case R:
-                if(x>TankFrame.GAME_WIDTH-width) break;
                 x += SPEED;
                 break;
             case D:
-                if(y>TankFrame.GAME_HEIGHT-height) break;
                 y += SPEED;
                 break;
         }
+        boundsCheck();
+    }
+    private void boundsCheck() {
+        if(x<0||y<30||x>(TankFrame.GAME_WIDTH-this.width)||y>(TankFrame.GAME_HEIGHT-this.height)){
+            this.back();
+        }
 
     }
-
     public void die(){
         this.setLive(false);
+        TankFrame.INSTANCE.getGm().add(new Explode(this.x, this.y));
+    }
+
+    public Rectangle getRect() {
+        return rect;
+    }
+
+    public void back() {
+        this.x=this.oldx;
+        this.y=this.oldy;
     }
 }

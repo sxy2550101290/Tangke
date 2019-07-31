@@ -1,19 +1,15 @@
 package com.sxy.tank.net;
 
-import com.sxy.tank.Dir;
-import com.sxy.tank.Player;
+import com.sxy.tank.Bullet;
 import com.sxy.tank.Tank;
 import com.sxy.tank.TankFrame;
 
 import java.io.*;
 import java.util.UUID;
 
-public class TankMovingOrDirChangeMsg extends Msg{
+public class TankDieMsg extends Msg{
     private UUID id;
-    private int x,y;
-    private Dir dir;
-
-
+    private UUID bulletId;
     public UUID getId() {
         return id;
     }
@@ -22,46 +18,20 @@ public class TankMovingOrDirChangeMsg extends Msg{
         this.id = id;
     }
 
-    public int getX() {
-        return x;
+    public UUID getBulletId() {
+        return bulletId;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public void setBulletId(UUID bulletId) {
+        this.bulletId = bulletId;
     }
 
-    public int getY() {
-        return y;
+    public TankDieMsg() {
     }
 
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public Dir getDir() {
-        return dir;
-    }
-
-    public void setDir(Dir dir) {
-        this.dir = dir;
-    }
-
-    public TankMovingOrDirChangeMsg(UUID id, int x, int y, Dir dir) {
+    public TankDieMsg(UUID id, UUID bulletId) {
         this.id = id;
-        this.x = x;
-        this.y = y;
-        this.dir = dir;
-    }
-    public TankMovingOrDirChangeMsg() {
-    }
-    @Override
-    public String toString() {
-        return "TankMovingOrDirChangeMsg{" +
-                "id=" + id +
-                ", x=" + x +
-                ", y=" + y +
-                ", dir=" + dir +
-                '}';
+        this.bulletId = bulletId;
     }
 
     @Override
@@ -73,11 +43,11 @@ public class TankMovingOrDirChangeMsg extends Msg{
         try {
             baos=new ByteArrayOutputStream();
             dos=new DataOutputStream(baos);
+            dos.writeLong(bulletId.getMostSignificantBits());
+            dos.writeLong(bulletId.getLeastSignificantBits());
+
             dos.writeLong(id.getMostSignificantBits());
             dos.writeLong(id.getLeastSignificantBits());
-            dos.writeInt(x);
-            dos.writeInt(y);
-            dos.writeInt(dir.ordinal());
 
             dos.flush();
             bytes=baos.toByteArray();
@@ -106,10 +76,8 @@ public class TankMovingOrDirChangeMsg extends Msg{
         DataInputStream dis=new DataInputStream(new ByteArrayInputStream(bytes));
 
         try {
+            this.bulletId=new UUID(dis.readLong(), dis.readLong());
             this.id=new UUID(dis.readLong(), dis.readLong());
-            this.x=dis.readInt();
-            this.y=dis.readInt();
-            this.dir=Dir.values()[dis.readInt()];
         }catch(Exception e){
             e.printStackTrace();
         }finally {
@@ -123,19 +91,26 @@ public class TankMovingOrDirChangeMsg extends Msg{
 
     @Override
     public void handle() {
-        if(!TankFrame.INSTANCE.getGm().getMytank().isLive()) return;
-        if(this.id.equals(TankFrame.INSTANCE.getGm().getMytank().getId())) return;
+        Bullet b =TankFrame.INSTANCE.getGm().findBulletByUUID(this.bulletId);
+
+        //击中的坦克
         Tank t=TankFrame.INSTANCE.getGm().findTankByUUID(this.id);
-        if(null != t){
-            t.setMoving(true);
-            t.setX(this.x);
-            t.setY(this.y);
-            t.setDir(this.dir);
+
+        //自己发的 return
+        if(this.id.equals(TankFrame.INSTANCE.getGm().getMytank().getId())) {
+            TankFrame.INSTANCE.getGm().getMytank().die();
+
+        }else{
+            if(null != t) {
+                t.die();
+                TankFrame.INSTANCE.getGm().remove(t);
+            }
         }
+
     }
 
     @Override
     public MsgType getMsgType() {
-        return MsgType.TankMovingOrDirChange;
+        return MsgType.TankStopMoving;
     }
 }

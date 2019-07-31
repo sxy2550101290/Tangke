@@ -4,6 +4,8 @@ import com.sxy.tank.AbstractGameObject;
 import com.sxy.tank.Bullet;
 import com.sxy.tank.ResourceMgr;
 import com.sxy.tank.Tank;
+import com.sxy.tank.net.Client;
+import com.sxy.tank.net.TankDieMsg;
 
 import java.awt.*;
 
@@ -16,14 +18,19 @@ public class BulletTankCollider implements Collider {
             //子弹 坦克是否死掉
             if(!b.isLive() || !t.isLive())return false;
 
-            if(b.getGroup()==t.getGroup()) return true;
 
             //Rectangle rect = new Rectangle(x, y,w , h);
             Rectangle rectTank = t.getRect();
             if(b.getRect().intersects(rectTank)){
-                b.die();
-                t.die();
-                return false;
+                if(!b.getPlayerId().equals(t.getId())){
+                    b.die();
+                    t.die();
+
+                    Client.INSTANCE.send(new TankDieMsg(t.getId(),b.getId()));
+
+                    return false;
+                }
+                return true;
             }
 
         } else if (obj1 instanceof  Tank && obj2 instanceof Bullet){

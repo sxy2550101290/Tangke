@@ -1,5 +1,7 @@
 package com.sxy.tank;
 
+import com.sxy.tank.net.Client;
+import com.sxy.tank.net.TankDieMsg;
 import com.sxy.tank.net.TankJoinMsg;
 
 import java.awt.*;
@@ -127,7 +129,7 @@ public class Tank  extends AbstractGameObject{
                 g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankL:ResourceMgr.goodTankL, x, y, null);
                 break;
             case U:
-                g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankU:ResourceMgr.badTankU, x, y, null);
+                g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankU:ResourceMgr.goodTankU, x, y, null);
                 break;
             case R:
                 g.drawImage(this.group.equals(Group.BAD)?ResourceMgr.badTankR:ResourceMgr.goodTankR, x, y, null);

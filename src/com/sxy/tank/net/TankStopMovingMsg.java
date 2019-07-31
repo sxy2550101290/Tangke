@@ -109,6 +109,7 @@ public class TankStopMovingMsg extends Msg{
 
     @Override
     public void handle() {
+        if(!TankFrame.INSTANCE.getGm().getMytank().isLive()) return;
         //自己发的 return
         if(this.id.equals(TankFrame.INSTANCE.getGm().getMytank().getId())) return;
         //找到对应的坦克

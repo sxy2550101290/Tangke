@@ -1,6 +1,7 @@
 package com.sxy.tank;
 
 import com.sxy.tank.chainofresponsibility.ColliderChain;
+import com.sxy.tank.chainofresponsibility.PlayerCollider;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -13,6 +14,8 @@ public class GameModel implements Serializable {
     private Player mytank;
     //private Wall wall;
     private List<AbstractGameObject> objects;
+
+    private PlayerCollider playerCollider;
     private ColliderChain colliderChain=new ColliderChain();
 
     private Random r=new Random();
@@ -24,7 +27,7 @@ public class GameModel implements Serializable {
     private void initGameObject() {
         objects=new ArrayList<>();
         //wall=new Wall(300, 150, 200, 60);
-
+        playerCollider=new PlayerCollider();
 
         //我方坦克起始坐标
 
@@ -44,24 +47,32 @@ public class GameModel implements Serializable {
         g.setColor(Color.white);
         g.drawString("objects"+objects.size(), 10, 50);
         g.setColor(c);
-        //第一个坦克
-        mytank.paint(g);
-        for (int i = 0; i < objects.size(); i++) {
-            AbstractGameObject go1 = objects.get(i);
-            if (!go1.isLive()) {
-                objects.remove(go1);
-                break;
+        //自己的坦克
+        if(mytank.isLive()) {
+            mytank.paint(g);
+            for (int i = 0; i < objects.size(); i++) {
+                AbstractGameObject go1 = objects.get(i);
+                playerCollider.collide(go1,mytank);
+                if (!go1.isLive()) {
+                    objects.remove(go1);
+                    break;
+                }
             }
-        }
-        for (int i = 0; i < objects.size(); i++) {
-            AbstractGameObject go1 = objects.get(i);
-            for (int j = 0; j < objects.size(); j++) {
-                AbstractGameObject go2 = objects.get(j);
-                colliderChain.collide(go1, go2);
+            for (int i = 0; i < objects.size(); i++) {
+                AbstractGameObject go1 = objects.get(i);
+                for (int j = 0; j < objects.size(); j++) {
+                    AbstractGameObject go2 = objects.get(j);
+                    colliderChain.collide(go1, go2);
+                }
+                if (go1.isLive()) {
+                    go1.paint(g);
+                }
             }
-            if (go1.isLive()) {
-                go1.paint(g);
-            }
+        }else{
+            Color c1=g.getColor();
+            g.setColor(Color.RED);
+            g.drawString("游戏结束", TankFrame.GAME_WIDTH/2, TankFrame.GAME_HEIGHT/2);
+            g.setColor(c1);
         }
     }
     public Player getMytank(){
@@ -80,4 +91,19 @@ public class GameModel implements Serializable {
         return null;
     }
 
+    public Bullet findBulletByUUID(UUID bulletId) {
+        for(AbstractGameObject o:objects){
+            if(o instanceof Bullet){
+                Bullet b=(Bullet)o;
+                if(bulletId.equals(b.getId())){
+                    return b;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void remove(AbstractGameObject go) {
+        objects.remove(go);
+    }
 }

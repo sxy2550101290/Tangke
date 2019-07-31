@@ -146,6 +146,7 @@ public class TankJoinMsg  extends Msg{
         if(TankFrame.INSTANCE.getGm().findTankByUUID(this.id)!=null) return;
 
         Tank t=new Tank(this);
+        t.setGroup(Group.BAD);
         TankFrame.INSTANCE.getGm().add(t);
         Client.INSTANCE.send(new TankJoinMsg(TankFrame.INSTANCE.getGm().getMytank()));
 
